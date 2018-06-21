@@ -19,7 +19,7 @@ default_modules = {
 class Bot(commands.Bot):
     def __init__(self):
         # Initialize Parent class
-        super().__init__(command_prefix="으낙아 ")
+        super().__init__(command_prefix="으낙봇 ")
 
         # Get token from setting
         self.token = SettingManager().get().Token
