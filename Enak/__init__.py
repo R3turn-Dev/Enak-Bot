@@ -1,20 +1,12 @@
-from discord import Client, Game, Embed
 from discord.ext import commands
-from .db import PostgreSQL
-from .settings import SettingManager
-from json import dumps
-from time import strftime, time
-from asyncio import sleep
+from .settings import Config
 
-conf = SettingManager().get().PostgreSQL
-DB = PostgreSQL(**conf)
-
-BotConf = dict(DB.get_configuration())
-
-
+# Declare default cogs
 default_modules = {
-    "cogs.tests"
+    "cogs.test",
+    "cogs.db_logger"
 }
+
 
 class Bot(commands.Bot):
     def __init__(self):
@@ -22,18 +14,8 @@ class Bot(commands.Bot):
         super().__init__(command_prefix="으낙봇 ")
 
         # Get token from setting
-        self.token = SettingManager().get().Token
-        self.logger = DB.writeLog
-
-        self.react_emoji = "👌"
-
-        # Handler for DB Functions
-        self.getCommands = DB.getCommands
-        self.getChannelInfo = DB.getChannelInfo
-        self.getFeedbackChannel = DB.getFeedbackChannel
-        self.getTemplateMessage = DB.getTemplateMessage
-        self.getAdmins = DB.getAdminInfo
-        self.getFooter = DB.getFooter
+        self.config = Config()
+        self.token = self.config.get("Bot.Token")
 
         # Default cogs
         for name in default_modules:
@@ -43,10 +25,11 @@ class Bot(commands.Bot):
                 print(f"Failed to load extension: {name}.")
                 raise e
 
-
     async def on_message(self, msg):
         print("""{0.server} {0.channel} {0.author} {0.content} {0.attachments} {0.embeds}""".format(msg))
         if msg.author.bot:
             return
         await self.process_commands(msg)
 
+    def start_bot(self):
+        self.run(self.token, bot=True)
