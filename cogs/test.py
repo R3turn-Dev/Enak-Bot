@@ -17,6 +17,9 @@ class RandomFeedback:
 
         await self.bot.send_message(ctx.message.channel, choice(stack))
 
+    async def on_ready(self, *args, **kwargs):
+        print(" Activated cogs.test")
+
 
 def setup(bot):
     bot.add_cog(RandomFeedback(bot))
