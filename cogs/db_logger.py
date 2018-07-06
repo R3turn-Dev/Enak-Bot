@@ -23,7 +23,7 @@ class Logger:
 
         cur.execute(
             f"INSERT INTO events (type, server, channel, user, lore)"
-            f"VALUES ('e_type', 'server', 'channel', 'user', E'lore');"
+            f"VALUES ('{e_type}', '{server}', '{channel}', '{user}', E'{lore}');"
         )
 
     async def msg_log(self, msg):
@@ -38,12 +38,15 @@ class Logger:
 
         cur.execute(
             f"INSERT INTO messages (msg_id, server, channel, author, content, attachments, embeds)"
-            f" VALUES ('msg.id', 'server_id', 'channel_id', 'author_id', "
-            f"E'content', E'attachments', E'embeds');"
-            )
+            f" VALUES ({msg.id}, '{server_id}', '{channel_id}', '{author_id}', "
+            f"E'{content}', E'{attachments}', E'{embeds}');"
+        )
 
     async def on_ready(self, *args, **kwargs):
         print(" Activated cogs.db_logger")
+
+    async def on_message(self, msg):
+        await self.msg_log(msg)
 
 def setup(bot):
     bot.add_cog(Logger(bot))
