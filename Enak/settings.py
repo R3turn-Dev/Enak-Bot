@@ -1,35 +1,24 @@
-from json import dump, load, dumps, loads
+import configparser
 
 
-class SettingManager:
-    def __init__(self, path="./sub/settings.json"):
-        self.setting = Setting()
+class Config:
+    def __init__(self, path="./sub/settings.ini"):
+        self.config = configparser.ConfigParser()
+        self.path = path
 
-        self.filename = path
-        self.file = None
+        self._load_config(path)
 
-        self.load()
+    def _load_config(self, path):
+        self.config.read(path)
 
-    def load(self):
-        self.file = open(self.filename, "r")
-        self.setting = Setting(**load(self.file))
+    def get(self, ind: str):
+        if not ind: raise Exception("Invalid setting path passed")
 
-    def save(self):
-        dump(self.setting.__dict__, open(self.filename, "w"), indent=2)  # PyCharm Default: 2 indent
+        ind = ind.split(".", 1)
 
-    def get(self):
-        return self.setting
-
-
-class Setting:
-    def __repr__(self):
-        return repr(self.__dict__)
-
-    def __str__(self):
-        return str(self.__dict__)
-
-    def __init__(self, **kwargs):
-        """
-        :param org: Original Set of Dictionary
-        """
-        self.__dict__ = kwargs
+        if len(ind) > 1:
+            grp, key = ind
+            return self.config.get(grp, key)
+        else:
+            grp,  = ind
+            return dict([(k, v) for k,v in self.config[grp].items()])
