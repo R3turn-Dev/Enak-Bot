@@ -6,7 +6,7 @@ class ConsoleOutput:
         self.sessions = set()
 
     async def on_ready(self, *args, **kwargs):
-        print(" Activated cogs.consloe_logger")
+        print(" Activated cogs.console_logger")
 
     async def on_message(self, msg):
         print(msg.id, msg.server, msg.channel, msg.author, msg.content)
