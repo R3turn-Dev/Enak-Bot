@@ -118,7 +118,8 @@ def setup(bot):
 ```ini
 [Bot]
 username = EnakBot
-OAuth_token = mWnbCHhEIsiacgcpZ7xxg3p3swGAQN
+Client-Id = JcRsRrC4uprBxLkinAjffuTyMgD0Ys
+Client-Secret = mWnbCHhEIsiacgcpZ7xxg3p3swGAQN
 Channels = return0927, enak-bot, habomm
 ```
 
