@@ -41,10 +41,11 @@ class Message:
         self.type = kwargs.get("type")
         self.channel = kwargs.get("channel")
         self.user = kwargs.get("user")
-        self.message = kwargs.get("message")
+        self.raw = kwargs.get("raw")
+        self.message = kwargs.get("message", self.raw.decode())
 
 
-class ctx:
+class Context:
     def __init__(self, bot, channel: Channel, user: User, msg: Message):
         self.bot = bot
         self.channel = channel

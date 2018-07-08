@@ -5,7 +5,7 @@ import asyncio
 import inspect
 import importlib
 
-from .prototypes import Channel, User, Message, ctx
+from .prototypes import Channel, User, Message, Context
 from discord.ext.commands import Command, command
 
 
@@ -39,7 +39,8 @@ class TwichClient:
     loop
         Main loop of a bot
     keep_running : bool
-
+    re : _sre.SRE_PATTERN
+        A re expression to parse a message
     """
 
     def __init__(self, *args, **kwargs):
@@ -69,8 +70,23 @@ class TwichClient:
 
         self.re = re.compile("^(PING)|:(.*)!.*PRIVMSG #(.*) :(.*)$")
 
-    async def process_command(self, data):
-        msg = data.decode()
+    async def process_command(self, ctx):
+        """Determine a message is issued for command and process a cog
+
+        Parameters
+        -----------------
+        ctx : Enak.prototypes.Context
+            A context containing information of chat data
+
+        Raises
+        ---------
+        None
+
+        Returns
+        ---------
+        None
+        """
+        msg = ctx.message
 
         if msg.startswith(self.command_prefix):
             name, *args = msg[1:].split(" ")
@@ -113,6 +129,24 @@ class TwichClient:
 
 
     def add_listener(self, func, name=None):
+        """Register a listener event :class:`function`
+
+        Parameters
+        -----------------
+        func
+            The corutine function to process an event.
+        name
+            A specific name of function
+
+        Raises
+        ---------
+        Exception
+            If the command is not a coroutine functinon.
+
+        Returns
+        ---------
+        None
+        """
         name = func.__name__ if name is None else name
 
         if not asyncio.iscoroutinefunction(func):
@@ -206,7 +240,7 @@ class TwichClient:
                     self.socket.send(b"PING :tmi.twitch.tv\n")
 
                 else:
-                    temp = ctx(
+                    temp = Context(
                         self,
                         Channel(channel),
                         User(user),
