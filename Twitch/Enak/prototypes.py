@@ -26,14 +26,15 @@ class Command:
 
 
 class Channel:
-    def __init__(self, cid):
+    def __init__(self, cid=""):
         self.name = cid
 
 
 class User:
-    def __init__(self, uid):
-        self.name = uid
-        self.nick = self.name
+    def __init__(self, **kwargs):
+        self.name = kwargs.get("uid", "")
+        self.nick = kwargs.get("nick", self.name)
+        self.tid = kwargs.get("tid", "")
 
 
 class Message:
@@ -41,7 +42,7 @@ class Message:
         self.type = kwargs.get("type")
         self.channel = kwargs.get("channel")
         self.user = kwargs.get("user")
-        self.raw = kwargs.get("raw")
+        self.raw = kwargs.get("raw", b"")
         self.message = kwargs.get("message", self.raw.decode())
 
 
