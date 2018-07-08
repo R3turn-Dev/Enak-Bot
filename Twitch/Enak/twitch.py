@@ -1,13 +1,112 @@
 import re
 import sys
 import socket
+import aiohttp
 import asyncio
 import inspect
 import importlib
+from datetime import datetime, timedelta
 
-from .prototypes import Channel, User, Message, Context
-from discord.ext.commands import Command, command
+from .prototypes import Channel, User, Message, Context, Command, command
 
+
+class APIConnector:
+    def __init__(self, cid, csc):
+        self.client_id = cid
+        self.csc = csc
+
+    def _make_header(self):
+        return {
+            'Accept': "application/vnd.twitchtv.v5+json",
+            'Client-ID': self.client_id,
+            'Authorization': f"OAuth {self.csc}"
+        }
+
+    async def get_user_by_name(self, name):
+        async with aiohttp.ClientSession() as sess:
+            async with sess.get(f"https://api.twitch.tv/kraken/users?login={name}", headers=self._make_header()) as resp:
+                data = await resp.json()
+
+                _temp = data['users'][0]
+                _nick = _temp['display_name']
+                _tid = _temp['_id']
+
+                return User(uid=name, nick=_nick, tid=_tid)
+
+    async def get_user_by_id(self, uid):
+        async with aiohttp.ClientSession() as sess:
+            async with sess.get(f"https://api.twitch.tv/kraken/users/{uid}", headers=self._make_header()) as resp:
+                data = await resp.json()
+
+                _nick = data['display_name']
+                _name = data['name']
+
+                return User(uid=_name, nick=_nick, tid=uid)
+
+    async def get_stream(self, uid):
+        if not uid:
+            return None
+
+        async with aiohttp.ClientSession() as sess:
+            async with sess.get(f"https://api.twitch.tv/kraken/streams/{uid}", headers=self._make_header()) as resp:
+                data = await resp.json()
+
+                _stream = data['stream']
+
+                if _stream is None:
+                    return None
+
+                _title = _stream['channel']['status']
+                _game = _stream['game']
+                _viewer = _stream['viewers']
+                _created_at = datetime.strptime(_stream['created_at'], "%Y-%m-%dT%H:%M:%SZ")
+
+                return {"title": _title, "game": _game, "viewers": _viewer, "createdAt": _created_at}
+
+    async def get_uptime(self, uid):
+        _data = await self.get_stream(uid)
+
+        if _data:
+            _start = _data['createdAt']
+            return self.humanizeTimeDiff(_start)
+        else:
+            return "방송중이 아닙니다."
+
+    def humanizeTimeDiff(self, timestamp = timedelta(seconds=0)):
+        """
+        Returns a humanized string representing time difference
+        between now() and the input timestamp.
+
+        The output rounds up to days, hours, minutes, or seconds.
+        4 days 5 hours returns '4 days'
+        0 days 4 hours 3 minutes returns '4 hours', etc...
+        """
+
+        timeDiff = datetime.utcnow() - timestamp
+        days = timeDiff.days
+        hours = timeDiff.seconds/3600
+        minutes = timeDiff.seconds%3600/60
+        seconds = timeDiff.seconds%3600%60
+
+        out = []
+        tStr = ""
+        if days > 0:
+            if days == 1:   tStr = "day"
+            else:           tStr = "days"
+            out.append("%d %s" %(days, tStr))
+        if hours > 0:
+            if hours == 1:  tStr = "hour"
+            else:           tStr = "hours"
+            out.append("%d %s" %(hours, tStr))
+        if minutes > 0:
+            if minutes == 1:tStr = "min"
+            else:           tStr = "mins"
+            out.append("%d %s" %(minutes, tStr))
+        if seconds > 0:
+            if seconds == 1:tStr = "sec"
+            else:           tStr = "secs"
+            out.append("%d %s" %(seconds, tStr))
+        return ", ".join(out)
 
 class TwichClient:
     """Simple Command-Based Twitch Chatbot Client.
@@ -47,8 +146,12 @@ class TwichClient:
         self.host = kwargs.get("host")
         self.port = kwargs.get("port", 80)
         self.user = kwargs.get("user")
-        self.token = kwargs.get("token")
+        self.cid = kwargs.get("cid")
+        self.csc = kwargs.get("csc")
         self.channels = kwargs.get("channels", [])
+        self._users = {}
+
+        self.APIHandler = APIConnector(self.cid, self.csc)
 
         self.command_prefix = kwargs.get("command_prefix", "!")
 
@@ -57,7 +160,8 @@ class TwichClient:
             "on_close": [kwargs.get("on_close", None)],
             "on_error": [kwargs.get("on_error", None)],
             "on_joined": [kwargs.get("on_joined", None)],
-            "on_data": [kwargs.get("on_data", None)]
+            "on_data": [kwargs.get("on_data", None)],
+            "on_chat": [kwargs.get("on_chat", None)]
         }
 
         self.cogs = {}
@@ -68,7 +172,18 @@ class TwichClient:
         self.loop = asyncio.get_event_loop()
         self.keep_running = False
 
-        self.re = re.compile("^(PING)|:(.*)!.*PRIVMSG #(.*) :(.*)$")
+        self.re = re.compile(r"^(PING)|:(.*)!.*(JOIN) #(.*)$|:(.*)!.*(PRIVMSG) #(.*) :(.*)$|^:(|.*)tmi.twitch.tv (\d\d\d) (.*) :(.*)$")
+
+    async def _build_user_info(self, name):
+        if not name in self._users:
+            self._user = await self.APIHandler.get_user_by_name(name)
+
+    async def get_user_info(self, name):
+        if name in self._users:
+            return self._users[name]
+        else:
+            await self._build_user_info(name)
+            return User(uid=name)
 
     async def process_command(self, ctx):
         """Determine a message is issued for command and process a cog
@@ -86,18 +201,18 @@ class TwichClient:
         ---------
         None
         """
-        msg = ctx.message
+        msg = ctx.message.message
 
         if msg.startswith(self.command_prefix):
             name, *args = msg[1:].split(" ")
 
             if name in self.commands:
-                command = self.commands[name]
+                _command = self.commands[name]
 
-                if command.pass_context:
-                    await command(ctx, args)
+                if _command.pass_context:
+                    await _command.callback(None, ctx, args)
                 else:
-                    await command(args)
+                    await _command.callback(None, args)
 
     def add_command(self, cmd):
         """Register a command :class:`Command` into TwitchBot.
@@ -158,6 +273,21 @@ class TwichClient:
             self.callbacks[name] = [func]
 
     def add_cog(self, cog):
+        """Register a cog containing commands :class:`function` and events :class:`function`
+
+        Parameters
+        -----------------
+        cog
+            A class containing commands and events
+
+        Raises
+        ---------
+        None
+
+        Returns
+        ---------
+        None
+        """
         self.cogs[type(cog).__name__] = cog
 
         members = inspect.getmembers(cog)
@@ -184,9 +314,9 @@ class TwichClient:
 
     async def send_msg(self, channel, data: str):
         if isinstance(channel, Channel):
-            self.socket.send(f"PRIVMSG #{channel.name} {data}\n".encode())
+            self.socket.send(f"PRIVMSG #{channel.name} :{data}\n".encode())
         elif isinstance(channel, str):
-            self.socket.send(f"PRIVMSG #{channel} {data}\n".encode())
+            self.socket.send(f"PRIVMSG #{channel} :{data}\n".encode())
         else:
             raise Exception("Channel passed is not supported type.")
 
@@ -210,7 +340,7 @@ class TwichClient:
                     if callback:
                         await callback(*args)
             except Exception as e:
-                raise Exception(f"Error on handing a callback {callback.name} / {e}")
+                raise Exception(f"Error on handling a callback {callback} / {e}")
 
     async def _join_channel(self, channel):
         if self.socket and not self.socket._closed:
@@ -222,40 +352,63 @@ class TwichClient:
             raise Exception(f"Error occured when joining channel / {repr(e)}")
                 
     async def _run(self, *args, **kwargs):
+        await self._build_user_info(self.user)
         await self._connect(*args, **kwargs)
         await self._callback(self.callbacks['on_open'], self.socket)
 
-        self.socket.send("PASS oauth:{}\n".format(self.token).encode())
-        self.socket.send("NICK {}\n".format(self.user).encode())
+        self.socket.send(f"PASS oauth:{self.csc}\n".encode())
+        self.socket.send(f"NICK {self.user}\n".encode())
 
         for channel in self.channels:
             await self._join_channel(channel)
+            await self._build_user_info(channel)
 
         while self.keep_running:
             try:
                 data = self.socket.recv(1024)
-                [glob, user, channel, msg] = self.re.findall(data)[0]
 
-                if glob == "PING":
-                    self.socket.send(b"PING :tmi.twitch.tv\n")
+                for _data in data.decode().split("\r\n")[:-1]:
+                    glob, _, _, _, _user, _type, _channel, _message, _me, _code, _self, _info = self.re.findall(_data)[0]
 
-                else:
                     temp = Context(
                         self,
-                        Channel(channel),
-                        User(user),
-                            Message(
-                            type = "message",
-                            channel = Channel(channel),
-                            user = User(user),
-                            message = msg
-                        )
+                        Channel(),
+                        User(),
+                        Message()
                     )
 
-                await self._callback(self.callbacks['on_data'], temp)
+                    if _user: await self._build_user_info(_user)
+
+                    if glob == "PING":
+                        self.socket.send(b"PING :tmi.twitch.tv\n")
+
+                        temp.channel.name = "GLOBAL"
+
+                        temp.user.name = "SYSTEM"
+
+                        temp.message.type = "PING"
+                        temp.message.user = temp.user
+                        temp.message.channle = temp.channel
+                        temp.message.raw = _data
+
+                    else:
+                        temp.channel.name = _channel
+
+                        temp.user.name = _user
+
+                        temp.message.type = "chat"
+                        temp.message.user = temp.user
+                        temp.message.channel = temp.channel
+                        temp.message.raw = _data
+                        temp.message.message = _message
+
+                    await self.process_command(temp)
+                    await self._callback(self.callbacks['on_data'], temp)
+                    if temp.message.type == "chat": await self._callback(self.callbacks['on_chat'], temp)
 
             except Exception as e:
-                await self._callback(self.callbacks['on_error'], e)
+                await self._callback(self.callbacks['on_error'], Exception(f" Error on internal {repr(e)}"))
+                raise e
 
         await self._callback(self.callbacks['on_close'])
 
