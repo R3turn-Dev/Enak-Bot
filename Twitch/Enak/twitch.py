@@ -408,7 +408,6 @@ class TwichClient:
 
             except Exception as e:
                 await self._callback(self.callbacks['on_error'], Exception(f" Error on internal {repr(e)}"))
-                raise e
 
         await self._callback(self.callbacks['on_close'])
 
