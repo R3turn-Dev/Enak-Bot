@@ -50,6 +50,12 @@ class BasicCommands:
 
         await ctx.reply(f"{is_follower}")
 
+    @command(['commands', '커맨드'], pass_context=True)
+    async def commands(self, ctx, *_):
+        commands = ctx.bot.commands
+
+        await ctx.reply(", ".join([ctx.bot.command_prefix + v for v in commands.keys()]))
+
     async def on_open(self, sock):
         print(" [BC] Bot is ready")
 
