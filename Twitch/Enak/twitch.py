@@ -172,10 +172,11 @@ class TwichClient:
         self.loop = asyncio.get_event_loop()
         self.keep_running = False
 
-        self.re = re.compile(r"^(PING)|:(.*)!.*(JOIN) #(.*)$|:(.*)!.*(PRIVMSG) #(.*) :(.*)$|^:(|.*)tmi.twitch.tv (\d\d\d) (.*) :(.*)$")
+        self.re = re.compile(r"^(PING)|:(.*)!.*(JOIN) #(.*)$|:(.*)!.*(PRIVMSG) "
+                             r"#(.*) :(.*)$|^:(|.*)tmi.twitch.tv (\d\d\d) (.*) :(.*)$")
 
     async def _build_user_info(self, name):
-        if not name in self._users:
+        if name not in self._users:
             self._user = await self.APIHandler.get_user_by_name(name)
 
     async def get_user_info(self, name):
@@ -241,7 +242,6 @@ class TwichClient:
                 raise Exception(f"Command {name} was already registered")
 
             self.commands[name] = cmd
-
 
     def add_listener(self, func, name=None):
         """Register a listener event :class:`function`
@@ -347,9 +347,10 @@ class TwichClient:
             try:
                 self.socket.send(f"JOIN #{channel}\n".encode())
             except Exception as e:
-                raise Exception(f"Error occured when joining channel / {repr(e)}")
+                raise Exception(f"Error was occured when joining channel / {repr(e)}")
         else:
-            raise Exception(f"Error occured when joining channel / {repr(e)}")
+            raise Exception(f"Error was occured when joining channel / The socket is not available to join"
+                            f"any channel")
                 
     async def _run(self, *args, **kwargs):
         await self._build_user_info(self.user)
@@ -404,7 +405,8 @@ class TwichClient:
 
                     await self.process_command(temp)
                     await self._callback(self.callbacks['on_data'], temp)
-                    if temp.message.type == "chat": await self._callback(self.callbacks['on_chat'], temp)
+                    if temp.message.type == "chat":
+                        await self._callback(self.callbacks['on_chat'], temp)
 
             except Exception as e:
                 await self._callback(self.callbacks['on_error'], Exception(f" Error on internal {repr(e)}"))
@@ -417,4 +419,3 @@ class TwichClient:
 
     def close(self):
         self.socket.close()
-
