@@ -72,6 +72,39 @@ class APIConnector:
         else:
             return "방송중이 아닙니다."
 
+    async def _get_channel_followers(self, channel: User, followers=list(), offset=0):
+        target = channel.tid
+
+        if target:
+            async with aiohttp.ClientSession() as sess:
+                async with sess.get(f"https://api.twitch.tv/kraken/channels/{target}"
+                                    f"/follows?offset={offset}&limit=100", headers=self._make_header()) as resp:
+                    _data = await resp.json()
+
+                    for _temp in _data['follows']:
+                        followers.append( (
+                            _temp['user']['name'],
+                            datetime.strptime(_temp['created_at'], '%Y-%m-%dT%H:%M:%SZ')
+                        ) )
+
+                    if len(followers) < _data['_total']:
+                        return await self._get_channel_followers(channel, followers, offset=offset+100)
+                    else:
+                        return followers
+
+        else:
+            raise Exception("Empty channel name passed")
+
+    async def get_is_channel_followed(self, channel: User, user: User):
+        _followers = await self._get_channel_followers(channel)
+        followers = [x[0] for x in _followers]
+        times = [x[1] for x in _followers]
+
+        if user.name in followers:
+            return times[followers.index(user.name)]
+        else:
+            return None
+
     def humanizeTimeDiff(self, timestamp = timedelta(seconds=0)):
         """
         Returns a humanized string representing time difference
@@ -389,7 +422,7 @@ class TwichClient:
 
                         temp.message.type = "PING"
                         temp.message.user = temp.user
-                        temp.message.channle = temp.channel
+                        temp.message.channel = temp.channel
                         temp.message.raw = _data
 
                     else:

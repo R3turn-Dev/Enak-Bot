@@ -7,7 +7,6 @@ class BasicCommands:
         self.bot = bot
         self.session = set()
 
-
     @command(['uptime', '업타임'], pass_context = True)
     async def uptime(self, ctx, *_):
         bot = ctx.bot
@@ -39,11 +38,23 @@ class BasicCommands:
         else:
             await ctx.reply("방송중이 아닙니다.")
 
+    @command(['follow', '팔로우'], pass_context=True)
+    async def information(self, ctx, *_):
+        API = ctx.bot.APIHandler
+
+        user = await API.get_user_by_name(ctx.user.name)
+        channel = await API.get_user_by_name(ctx.channel.name)
+
+        _data = await API.get_is_channel_followed(channel, user)
+        is_follower = "팔로우 한지 " + API.humanizeTimeDiff(_data) if _data else "아직 팔로우를 안하셨군요 ㅠ,,"
+
+        await ctx.reply(f"{is_follower}")
+
     async def on_open(self, sock):
         print(" [BC] Bot is ready")
 
     async def on_data(self, ctx):
-        print(ctx.user.name, ctx.channel.name, ctx.message.type, ctx.message.message)
+        print(ctx.user.name, ctx.channel.name, ctx.message.type, ctx.message.message, ctx.message.raw)
 
     async def on_error(self, e):
         print(f"\n\n\n    {repr(e)}\n\n\n")
