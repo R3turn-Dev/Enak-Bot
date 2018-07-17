@@ -48,5 +48,6 @@ class Logger:
     async def on_message(self, msg):
         await self.msg_log(msg)
 
+
 def setup(bot):
     bot.add_cog(Logger(bot))
