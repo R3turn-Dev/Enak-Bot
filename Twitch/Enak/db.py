@@ -6,11 +6,11 @@ from re import escape
 
 class PostgreSQL:
     def __init__(self, initial_connect=True, **kwargs):
-        self.host = kwargs.get("host")
-        self.port = kwargs.get("port")
-        self.user = kwargs.get("user")
-        self.pw = kwargs.get("password")
-        self.db = kwargs.get("database")
+        self.host = kwargs.get("host", "localhost")
+        self.port = kwargs.get("port", 5432)
+        self.user = kwargs.get("user", "postgres")
+        self.pw = kwargs.get("password", "")
+        self.db = kwargs.get("database", "EnakBot")
 
         self.conn = None
         self.cursor = None

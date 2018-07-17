@@ -8,6 +8,7 @@ import importlib
 from datetime import datetime, timedelta
 
 from .prototypes import Channel, User, Message, Context, Command, command
+from .exceptions import RawParseError
 
 
 class APIConnector:
@@ -141,6 +142,7 @@ class APIConnector:
             out.append("%d %s" %(seconds, tStr))
         return ", ".join(out)
 
+
 class TwichClient:
     """Simple Command-Based Twitch Chatbot Client.
 
@@ -194,7 +196,8 @@ class TwichClient:
             "on_error": [kwargs.get("on_error", None)],
             "on_joined": [kwargs.get("on_joined", None)],
             "on_data": [kwargs.get("on_data", None)],
-            "on_chat": [kwargs.get("on_chat", None)]
+            "on_chat": [kwargs.get("on_chat", None)],
+            "on_out": [kwargs.get("on_out", None)]
         }
 
         self.cogs = {}
@@ -347,9 +350,30 @@ class TwichClient:
 
     async def send_msg(self, channel, data: str):
         if isinstance(channel, Channel):
-            self.socket.send(f"PRIVMSG #{channel.name} :{data}\n".encode())
+            _temp = f"PRIVMSG #{channel.name} :{data}\n".encode()
+            self.socket.send(_temp)
+
+            _ctx = Context(self, channel, User(), Message())
+            _ctx.user.name = "EnakBot"
+            _ctx.message.type = "byte-out"
+            _ctx.message.user = _ctx.user
+            _ctx.message.raw = _temp
+            _ctx.message.message = _temp.decode()
+
+            await self._callback(self.callbacks['on_out'], _ctx)
         elif isinstance(channel, str):
-            self.socket.send(f"PRIVMSG #{channel} :{data}\n".encode())
+            _temp = f"PRIVMSG #{channel} :{data}\n".encode()
+            self.socket.send(_temp)
+
+            _ctx = Context(self, Channel(), User(), Message())
+            _ctx.channel.name = channel
+            _ctx.user.name = "EnakBot"
+            _ctx.message.type = "byte-out"
+            _ctx.message.user = _ctx.user
+            _ctx.message.raw = _temp
+            _ctx.message.message = _temp.decode()
+
+            await self._callback(self.callbacks['on_out'], _ctx)
         else:
             raise Exception("Channel passed is not supported type.")
 
@@ -398,9 +422,9 @@ class TwichClient:
             await self._build_user_info(channel)
 
         while self.keep_running:
-            try:
-                data = self.socket.recv(1024)
+            data = self.socket.recv(2**20)
 
+            try:
                 for _data in data.decode().split("\r\n")[:-1]:
                     glob, _, _, _, _user, _type, _channel, _message, _me, _code, _self, _info = self.re.findall(_data)[0]
 
@@ -414,7 +438,7 @@ class TwichClient:
                     if _user: await self._build_user_info(_user)
 
                     if glob == "PING":
-                        self.socket.send(b"PING :tmi.twitch.tv\n")
+                        self.socket.send(b"PONG :tmi.twitch.tv\n")
 
                         temp.channel.name = "GLOBAL"
 
@@ -442,7 +466,8 @@ class TwichClient:
                         await self._callback(self.callbacks['on_chat'], temp)
 
             except Exception as e:
-                await self._callback(self.callbacks['on_error'], Exception(f" Error on internal {repr(e)}"))
+                await self._callback(self.callbacks['on_error'], RawParseError(f" Error on internal {repr(e)}",
+                                                                               data=data))
 
         await self._callback(self.callbacks['on_close'])
 

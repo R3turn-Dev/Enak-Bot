@@ -38,6 +38,15 @@ class BasicCommands:
         else:
             await ctx.reply("방송중이 아닙니다.")
 
+    @command(['enak', 'enakbot'], pass_context=True)
+    async def enak_eng(self, ctx, *_):
+        await ctx.reply(f"{ctx.user.name} EnakBot is Twitch-Discord crossplatform chatbot operated & developed by @return0927 (Eunhak Lee).")
+
+
+    @command(['으낙', '으낙봇'], pass_context=True)
+    async def enakbot(self, ctx, *_):
+        await ctx.reply(f"@{ctx.user.name} 으낙봇은 트수 @return0927 (이은학)이 개발/운영하는 트위치-디스코드 크로스플랫폼 챗봇입니다.")
+
     @command(['follow', '팔로우'], pass_context=True)
     async def information(self, ctx, *_):
         API = ctx.bot.APIHandler
@@ -48,7 +57,7 @@ class BasicCommands:
         _data = await API.get_is_channel_followed(channel, user)
         is_follower = "팔로우 한지 " + API.humanizeTimeDiff(_data) if _data else "아직 팔로우를 안하셨군요 ㅠ,,"
 
-        await ctx.reply(f"{is_follower}")
+        await ctx.reply(f"@{ctx.user.name}, {is_follower}")
 
     @command(['commands', '커맨드'], pass_context=True)
     async def commands(self, ctx, *_):
@@ -60,9 +69,11 @@ class BasicCommands:
         print(" [BC] Bot is ready")
 
     async def on_data(self, ctx):
+        return
         print(ctx.user.name, ctx.channel.name, ctx.message.type, ctx.message.message, ctx.message.raw)
 
     async def on_error(self, e):
+        return
         print(f"\n\n\n    {repr(e)}\n\n\n")
 
 def setup(bot):

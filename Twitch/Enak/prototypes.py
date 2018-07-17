@@ -1,6 +1,7 @@
 import inspect
 import asyncio
 
+
 # Forked from discord.ext.commands.command
 def command(name=None, cls=None, **attrs):
     if cls is None:
@@ -16,6 +17,7 @@ def command(name=None, cls=None, **attrs):
         return cls(name=fname, callback=func, **attrs)
 
     return decorator
+
 
 class Command:
     def __init__(self, name, callback, **attrs):

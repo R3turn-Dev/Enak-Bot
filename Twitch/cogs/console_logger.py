@@ -7,7 +7,10 @@ class ConsoleLogger:
         print(" [CL] Bot is ready")
 
     async def on_data(self, ctx):
-        print(f" [CL] {ctx.message.raw}")
+        print(f" [CL] > {ctx.message.raw}")
+
+    async def on_out(self, ctx):
+        print(f" [CL] < {ctx.message.raw}")
 
     async def on_error(self, e):
         print(f" ! Exception {repr(e)}")
