@@ -19,10 +19,10 @@ class PostgreSQL:
         self.curDict = {}
 
         if initial_connect:
-            self._get_connection()
-            self._get_cursor()
+            self.get_connection()
+            self.get_cursor()
 
-    def _get_connection(self):
+    def get_connection(self):
         self.conn = connect(
             host=self.host,
             port=self.port,
@@ -34,11 +34,11 @@ class PostgreSQL:
         self.conn.autocommit = True
         return self.conn
 
-    def _get_cursor(self):
+    def get_cursor(self):
         thread_id = get_ident().__int__()
 
         if thread_id not in self.connDict.keys():
-            self.connDict[thread_id] = self._get_connection()
+            self.connDict[thread_id] = self.get_connection()
 
         if thread_id not in self.curDict.keys():
             self.curDict[thread_id] = self.connDict[thread_id].cursor()
@@ -46,4 +46,4 @@ class PostgreSQL:
         return self.curDict[thread_id]
 
     def execute(self, query):
-        return self._get_connection().execute(query)
+        return self.get_connection().execute(query)
