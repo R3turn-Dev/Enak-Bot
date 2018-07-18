@@ -348,6 +348,12 @@ class TwichClient:
         lib.setup(self)
         self.extensions[name] = lib
 
+    async def send_raw(self, raw):
+        _data = self.socket.send(raw)
+
+        await self._callback(self.callbacks['on_raw'], raw)
+        return _data
+
     async def send_msg(self, channel, data: str):
         if isinstance(channel, Channel):
             _temp = f"PRIVMSG #{channel.name} :{data}\n".encode()
