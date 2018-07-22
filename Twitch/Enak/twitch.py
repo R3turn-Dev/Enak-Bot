@@ -97,14 +97,14 @@ class APIConnector:
             raise Exception("Empty channel name passed")
 
     async def get_is_channel_followed(self, channel: User, user: User):
-        _followers = await self._get_channel_followers(channel)
-        followers = [x[0] for x in _followers]
-        times = [x[1] for x in _followers]
+        async with aiohttp.ClientSession() as sess:
+            async with sess.get(f"https://api.twitch.tv/kraken/users/{user.tid}/follows/channels/{channel.tid}", headers=self._make_header()) as resp:
+                _data = await resp.json()
 
-        if user.name in followers:
-            return times[followers.index(user.name)]
-        else:
-            return None
+                if _data and "created_at" in _data:
+                    return datetime.strptime(_data['created_at'], "%Y-%m-%dT%H:%M:%SZ")
+
+        return None
 
     def humanizeTimeDiff(self, timestamp = timedelta(seconds=0)):
         """
