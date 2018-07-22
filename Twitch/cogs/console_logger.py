@@ -5,12 +5,13 @@ class ConsoleLogger:
 
     async def on_open(self, sock):
         print(" [CL] Bot is ready")
+        print(f" [CL] Connected on {sock.getpeername()}")
 
     async def on_data(self, ctx):
         print(f" [CL] > {ctx.message.raw}")
 
-    async def on_out(self, ctx):
-        print(f" [CL] < {ctx.message.raw}")
+    async def on_raw(self, raw):
+        print(f" [CL] < {raw}")
 
     async def on_error(self, e):
         print(f" ! Exception {repr(e)}")
