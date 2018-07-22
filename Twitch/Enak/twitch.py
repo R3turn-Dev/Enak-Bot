@@ -197,7 +197,7 @@ class TwichClient:
             "on_joined": [kwargs.get("on_joined", None)],
             "on_data": [kwargs.get("on_data", None)],
             "on_chat": [kwargs.get("on_chat", None)],
-            "on_out": [kwargs.get("on_out", None)]
+            "on_raw": [kwargs.get("on_raw", None)]
         }
 
         self.cogs = {}
@@ -208,7 +208,7 @@ class TwichClient:
         self.loop = asyncio.get_event_loop()
         self.keep_running = False
 
-        self.re = re.compile(r"^(PING)|:(.*)!.*(JOIN) #(.*)$|:(.*)!.*(PRIVMSG) "
+        self.re = re.compile(r"^(PING)|(PONG)|:(.*)!.*(JOIN) #(.*)$|:(.*)!.*(PRIVMSG) "
                              r"#(.*) :(.*)$|^:(|.*)tmi.twitch.tv (\d\d\d) (.*) :(.*)$")
 
     async def _build_user_info(self, name):
@@ -244,14 +244,14 @@ class TwichClient:
             name, *args = msg[1:].split(" ")
 
             if name in self.commands:
-                _command = self.commands[name]
+                _command, _parent = self.commands[name]
 
                 if _command.pass_context:
-                    await _command.callback(None, ctx, args)
+                    await _command.callback(_parent, ctx, args)
                 else:
-                    await _command.callback(None, args)
+                    await _command.callback(_parent, args)
 
-    def add_command(self, cmd):
+    def add_command(self, cmd, parent):
         """Register a command :class:`Command` into TwitchBot.
 
         Parameters
@@ -277,7 +277,7 @@ class TwichClient:
             if name in self.commands.keys():
                 raise Exception(f"Command {name} was already registered")
 
-            self.commands[name] = cmd
+            self.commands[name] = [cmd, parent]
 
     def add_listener(self, func, name=None):
         """Register a listener event :class:`function`
@@ -329,7 +329,7 @@ class TwichClient:
         members = inspect.getmembers(cog)
         for name, member in members:
             if isinstance(member, Command):
-                self.add_command(member)
+                self.add_command(member, cog)
             
             if name.startswith('on_'):
                 self.add_listener(member)
@@ -366,7 +366,7 @@ class TwichClient:
             _ctx.message.raw = _temp
             _ctx.message.message = _temp.decode()
 
-            await self._callback(self.callbacks['on_out'], _ctx)
+            await self._callback(self.callbacks['on_raw'], _temp)
         elif isinstance(channel, str):
             _temp = f"PRIVMSG #{channel} :{data}\n".encode()
             self.socket.send(_temp)
@@ -379,7 +379,7 @@ class TwichClient:
             _ctx.message.raw = _temp
             _ctx.message.message = _temp.decode()
 
-            await self._callback(self.callbacks['on_out'], _ctx)
+            await self._callback(self.callbacks['on_raw'], _temp)
         else:
             raise Exception("Channel passed is not supported type.")
 
@@ -420,8 +420,8 @@ class TwichClient:
         await self._connect(*args, **kwargs)
         await self._callback(self.callbacks['on_open'], self.socket)
 
-        self.socket.send(f"PASS oauth:{self.csc}\n".encode())
-        self.socket.send(f"NICK {self.user}\n".encode())
+        await self.send_raw(f"PASS oauth:{self.csc}\n".encode())
+        await self.send_raw(f"NICK {self.user}\n".encode())
 
         for channel in self.channels:
             await self._join_channel(channel)
@@ -432,7 +432,7 @@ class TwichClient:
 
             try:
                 for _data in data.decode().split("\r\n")[:-1]:
-                    glob, _, _, _, _user, _type, _channel, _message, _me, _code, _self, _info = self.re.findall(_data)[0]
+                    ping, pong, _, _, _, _user, _type, _channel, _message, _me, _code, _self, _info = self.re.findall(_data)[0]
 
                     temp = Context(
                         self,
@@ -443,8 +443,10 @@ class TwichClient:
 
                     if _user: await self._build_user_info(_user)
 
-                    if glob == "PING":
-                        self.socket.send(b"PONG :tmi.twitch.tv\n")
+                    if pong == "PONG":
+                        print(_data)
+                    elif ping == "PING":
+                        await self.send_raw(b"PONG :tmi.twitch.tv\r\n")
 
                         temp.channel.name = "GLOBAL"
 
@@ -466,10 +468,10 @@ class TwichClient:
                         temp.message.raw = _data
                         temp.message.message = _message
 
-                    await self.process_command(temp)
                     await self._callback(self.callbacks['on_data'], temp)
                     if temp.message.type == "chat":
                         await self._callback(self.callbacks['on_chat'], temp)
+                    await self.process_command(temp)
 
             except Exception as e:
                 await self._callback(self.callbacks['on_error'], RawParseError(f" Error on internal {repr(e)}",
