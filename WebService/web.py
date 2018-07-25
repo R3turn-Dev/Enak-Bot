@@ -7,7 +7,9 @@ config = Config()
 engine = FlaskEngine(
     config.get("Web"),
     webpages=[
-        "pages.root"
+        "pages.root",
+        "pages.login",
+        "pages.sso"
     ]
 )
 

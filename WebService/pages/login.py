@@ -1,4 +1,6 @@
 from engine import SingleWebPage
+from settings import Config
+
 from flask import render_template_string, send_from_directory
 from os.path import realpath
 from time import time
@@ -7,14 +9,16 @@ from hashlib import sha256
 encrypt = lambda x: sha256(x.encode()).hexdigest().upper()
 
 
-class Root:
-    def __init__(self, engine, path="./pages/root"):
+class Login:
+    def __init__(self, engine, path="./pages/login"):
+        self.uris = Config().get("SSO")
+
         self.engine = engine
 
         self.parent = SingleWebPage(
-            name="/",
-            url_prefix="",
-            description="Root 홈(메인페이지)",
+            name="/login",
+            url_prefix="/login",
+            description="Login (로그인페이지)",
             template_folder=path
         )
         self.mobile_platform = ['android', 'iphone', 'blackberry']
@@ -32,22 +36,16 @@ class Root:
         def root(*args, **kwargs):
             return render_template(
                 "index.html",
-                debugstring=f"?{time()}" if self.is_debugging() else ""
-            )
-
-        @self.parent.bp.route("/discord")
-        def discord(*args, **kwargs):
-            return render_template(
-                "discord.html",
-                debugstring=f"?{time()}" if self.is_debugging() else ""
+                debugstring=f"?{time()}" if self.is_debugging() else "",
+                **self.uris
             )
 
         @self.parent.bp.route("/<any(css, img, js, media):folder>/<path:filename>")
         def statics(folder, filename):
-            return send_from_directory(f"{path}/{self.parent.name}/", f"{folder}/{filename}")
+            return send_raw(folder, filename)
 
     def is_debugging(self):
         return self.engine.app.debug
 
 def setup(engine):
-    engine.register_blueprint(Root(engine).parent.bp)
+    engine.register_blueprint(Login(engine).parent.bp)
