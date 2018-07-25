@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>으낙봇 : Login</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="js/index.js{{ debugstring }}"></script>
+    <link rel="stylesheet" href="css/index.css{{ debugstring }}" />
+
+    <script>
+        let discord_uri = "{{ discord|safe }}";
+        let twitch_uri = "{{ twitch|safe }}";
+    </script>
+</head>
+<body>
+    <div class="content">
+
+    </div>
+    <div class="login-area">
+        <div class="login-box">
+            <div class="login-info">
+                <label class="primary">소셜 로그인</label>
+                <lable class="secondary">Social Login</lable><br/>
+                <label>아래의 로그인수단 중 하나를 골라주세요.</label>
+            </div>
+            <div class="platforms">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <label>Twitch</label>
+                                <hr />
+                            </td>
+                            <td class="whitespace"></td>
+                            <td>
+                                <label>Discord</label>
+                                <hr />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td onclick="javascript:twitch();">
+                                <img src="img/Twitch-256.png" />
+                            </td>
+                            <td class="whitespace"></td>
+                            <td onclick="javascript:discord();">
+                                <img src="img/Discord.png" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

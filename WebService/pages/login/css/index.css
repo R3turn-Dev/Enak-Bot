@@ -1,0 +1,65 @@
+/*
+    Author: return0927, 이은학
+    Path: Login
+*/
+
+body {
+    background-color: #2C2F33;
+
+    color: white;
+}
+
+.login-area {
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+
+    height: 400px;
+    width: 600px;
+
+    padding: 20px;
+
+    margin-top: -200px;
+    margin-left: -300px;
+}
+
+.login-box {
+    height: 100%;
+    width: 100%;
+}
+
+.primary {
+    font-weight: bold;
+    font-size: 1.75em;
+
+    vertical-align: middle;
+}
+
+.secondary {
+    font-size: 1.15em;
+
+    vertical-align: bottom;
+}
+
+.platforms {
+    margin: 20px;
+    margin-top: 60px;
+
+    text-align: center;
+}
+
+.platforms table {
+    display: inline;
+}
+
+td.whitespace {
+    width: 20px;
+}
+
+.platforms img, .platforms embed {
+    height: 100px;
+    width: 100px;
+
+    cursor: pointer;
+}
