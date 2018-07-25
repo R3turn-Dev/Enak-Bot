@@ -2,13 +2,60 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Hi Foreigners</title>
+    <title>으낙봇 : EnakBot</title>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="js/index.js{{ debugstring }}"></script>
     <link rel="stylesheet" href="css/index.css{{ debugstring }}" />
 </head>
 <body>
-<div class="content">
-</div>
+    <div class="header">
+        <ul class="right-header">
+            <dl>
+                <a href="/">홈</a>
+            </dl>
+            <dl>
+                <a href="/bot/">봇 사용</a>
+            </dl>
+            <dl>
+                <a href="/login/">로그인</a>
+            </dl>
+            <dl>
+                <a href="#" onclick="javscript: discord_popup();">공식 디스코드</a>
+            </dl>
+        </ul>
+    </div>
+    <div class="content row">
+        <div class="left">
+            <div class="profile">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td style="width: 150px">
+                                <div class="profile-image">
+                                    <img src="https://cdn.discordapp.com/avatars/430751636156186625/f6316f8eb79bf366289f11546fe2a407.png?size=256" />
+                                </div>
+                            </td>
+                            <td style="width: 15px">
+                                <!-- Whitespace -->
+                            </td>
+                            <td>
+                                <div class="profile-info">
+                                    <label class="primary">으낙봇</label>
+                                    <label class="secondary">EnakBot</label><br />
+                                    <label>크로스플랫폼 챗봇</label><br />
+                                    <label>X-Platform chatbot</label><br /><br />
+                                    <label>Discord / Twitch / YouTube / Facebook</label>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="right">
+            <label></label>
+        </div>
+    </div>
 </body>
 </html>
