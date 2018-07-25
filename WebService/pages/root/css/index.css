@@ -1,0 +1,33 @@
+/*
+    Author: return0927, 이은학
+    Path: Root
+*/
+
+@import url(https://cdn.rawgit.com/moonspam/NanumSquare/master/nanumsquare.css);
+
+html, body {
+    margin: 0;
+}
+
+body {
+    background: #fff3ca;
+
+    margin: 10px;
+    font-family: 'NanumSquare', sans-serif;
+}
+
+.content {
+    position: relative;
+
+    margin-top: 30px;
+}
+
+hr {
+    width: 300px;
+}
+
+.content > label:first-child {
+    font-weight: bold;
+    font-size: 1.25em;
+    line-height: 2;
+}
