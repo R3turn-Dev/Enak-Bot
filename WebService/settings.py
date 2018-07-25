@@ -1,9 +1,9 @@
-from configparser import ConfigParser
+from configparser import RawConfigParser
 
 
 class Config:
     def __init__(self, path="./sub/settings.ini"):
-        self.config = ConfigParser()
+        self.config = RawConfigParser()
         self.file = path
 
         self._read(path)
