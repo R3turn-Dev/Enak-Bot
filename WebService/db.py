@@ -49,4 +49,57 @@ class PostgreSQL:
         return self.curDict[thread_id]
 
     def execute(self, query):
-        return self.getConn().execute(query)
+        cur = self.getCursor()
+        cur.execute(query)
+        return cur
+
+    def add_user(self, platform, **kwargs):
+        _logged_in = kwargs.get("now")
+        if platform == "discord":
+            uid = kwargs.get("uid")
+            email = kwargs.get("email")
+            name = kwargs.get("name")
+
+            _already_registered = self.execute(f"SELECT uuid FROM users WHERE discord='{uid}';").fetchall()
+
+            if _already_registered:
+                print("Already registered as ", _already_registered[0][0])
+                return [False, _already_registered[0][0]]
+
+            if not self.execute(f"SELECT did FROM discord WHERE did='{uid}';").fetchall():
+                self.execute(f"INSERT INTO discord (did, email, username) VALUES ('{uid}', '{email}', '{name}') RETURNING did;").fetchall()
+
+            if _logged_in:
+                _uuid = _logged_in
+                _uuid = self.execute(f"UPDATE users SET discord='{uid}' WHERE uuid='{_uuid}' RETURNING uuid;").fetchall()
+                print("Added new platform into ", _uuid[0][0])
+            else:
+                _uuid = self.execute(f"INSERT INTO users (discord) VALUES ('{uid}') RETURNING uuid;").fetchall()
+                print("New user registered as ", _uuid[0][0])
+
+            return [True, _uuid[0][0]]
+
+        elif platform == "twitch":
+            tid = kwargs.get("tid")
+            uid = kwargs.get("uid")
+            email = kwargs.get("email")
+            name = kwargs.get("name")
+
+            _already_registered = self.execute(f"SELECT uuid FROM users WHERE twitch='{tid}';").fetchall()
+
+            if _already_registered:
+                print("Already registered as ", _already_registered[0][0])
+                return [False, _already_registered[0][0]]
+
+            if not self.execute(f"SELECT tid FROM twitch WHERE tid='{tid}';").fetchall():
+                self.execute(f"INSERT INTO twitch (tid, uid, email, username) VALUES ('{tid}', '{uid}', '{email}', '{name}') RETURNING tid;").fetchall()
+                
+            if _logged_in:
+                _uuid = _logged_in
+                _uuid = self.execute(f"UPDATE users SET twitch='{tid}' WHERE uuid='{_uuid}' RETURNING uuid;").fetchall()
+                print("Added new platform into ", _uuid[0][0])
+            else:
+                _uuid = self.execute(f"INSERT INTO users (twitch) VALUES ('{tid}') RETURNING uuid;").fetchall()
+                print("New user registered as ", _uuid[0][0])
+
+            return [True, _uuid[0][0]]
