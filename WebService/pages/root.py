@@ -1,5 +1,5 @@
 from engine import SingleWebPage
-from flask import render_template_string, send_from_directory
+from flask import render_template_string, send_from_directory, session
 from os.path import realpath
 from time import time
 from hashlib import sha256
@@ -22,6 +22,7 @@ class Root:
         def render_template(template_name, **kwargs):
             return render_template_string(
                 open(f"{realpath(self.parent.bp.template_folder)}/{template_name}", "r", encoding="UTF-8").read(),
+                google_analystics=open(f"{realpath(self.parent.bp.template_folder)}/../global/gtag.html", "r", encoding="UTF-8").read(),
                 **kwargs
             )
 

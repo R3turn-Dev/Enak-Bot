@@ -1,7 +1,7 @@
 from engine import SingleWebPage
 from settings import Config
 
-from flask import render_template_string, send_from_directory
+from flask import render_template_string, send_from_directory, request, session
 from os.path import realpath
 from time import time
 from hashlib import sha256
@@ -26,6 +26,7 @@ class Login:
         def render_template(template_name, **kwargs):
             return render_template_string(
                 open(f"{realpath(self.parent.bp.template_folder)}/{template_name}", "r", encoding="UTF-8").read(),
+                google_analystics=open(f"{realpath(self.parent.bp.template_folder)}/../global/gtag.html", "r", encoding="UTF-8").read(),
                 **kwargs
             )
 
@@ -34,11 +35,23 @@ class Login:
 
         @self.parent.bp.route('/')
         def root(*args, **kwargs):
+            print(session.get("uuid"), session.get("li_platform"))
             return render_template(
                 "index.html",
                 debugstring=f"?{time()}" if self.is_debugging() else "",
+                session=session,
                 **self.uris
             )
+
+        @self.parent.bp.route('/out')
+        def logout(*args, **kwargs):
+            platform = request.args.get("platform")
+
+            if session.get("li_platform") and session['li_platform'].get(platform):
+                session['li_platform'].pop(platform, None)
+                session.modified = True
+
+            return """<script>location.href="/";</script>"""
 
         @self.parent.bp.route("/<any(css, img, js, media):folder>/<path:filename>")
         def statics(folder, filename):
