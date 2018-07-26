@@ -4,6 +4,7 @@
 */
 
 body {
+    background-color: #dad6db;
     background-color: #2C2F33;
 
     color: white;
@@ -54,7 +55,7 @@ body {
 }
 
 td.whitespace {
-    width: 20px;
+    width: 50px;
 }
 
 .platforms img, .platforms embed {
@@ -62,4 +63,15 @@ td.whitespace {
     width: 100px;
 
     cursor: pointer;
+}
+
+.platform-name {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+a {
+    text-decoration: underline;
+    text-decoration-color: whitesmoke;
+    color: whitesmoke;
 }

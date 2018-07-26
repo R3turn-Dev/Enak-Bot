@@ -8,6 +8,8 @@
     <script src="js/index.js{{ debugstring }}"></script>
     <link rel="stylesheet" href="css/index.css{{ debugstring }}" />
 
+    {{ google_analystics|safe }}
+
     <script>
         let discord_uri = "{{ discord|safe }}";
         let twitch_uri = "{{ twitch|safe }}";
@@ -29,12 +31,12 @@
                     <tbody>
                         <tr>
                             <td>
-                                <label>Twitch</label>
+                                <label class="platform-name">Twitch</label>
                                 <hr />
                             </td>
                             <td class="whitespace"></td>
                             <td>
-                                <label>Discord</label>
+                                <label class="platform-name">Discord</label>
                                 <hr />
                             </td>
                         </tr>
@@ -45,6 +47,34 @@
                             <td class="whitespace"></td>
                             <td onclick="javascript:discord();">
                                 <img src="img/Discord.png" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                {% if "twitch" in session.li_platform %}
+                                <label class="already">{{ session.li_platform.twitch.name }}</label>
+                                {% endif %}
+                            </td>
+                            <td class="whitespace"></td>
+                            <td>
+                                {% if "discord" in session.li_platform %}
+                                <label class="already">{{ session.li_platform.discord.name }}</label>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                {% if "twitch" in session.li_platform %}
+                                <hr />
+                                <a class="logout" href="./out?platform=twitch">로그아웃</a>
+                                {% endif %}
+                            </td>
+                            <td class="whitespace"></td>
+                            <td>
+                                {% if "discord" in session.li_platform %}
+                                <hr />
+                                <a class="logout" href="./out?platform=discord">로그아웃</a>
+                                {% endif %}
                             </td>
                         </tr>
                     </tbody>

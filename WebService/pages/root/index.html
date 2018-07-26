@@ -7,6 +7,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="js/index.js{{ debugstring }}"></script>
     <link rel="stylesheet" href="css/index.css{{ debugstring }}" />
+
+    {{ google_analystics|safe }}
+
 </head>
 <body>
     <div class="header">
@@ -27,14 +30,14 @@
     </div>
     <div class="content row">
         <div class="left">
-        </div>
-        <div class="right">
             <div class="deep"></div>
             <label class="primary">New features, haven't been before!</label><br />
             <label class="secondary">이전까지 없던 새로운 기능</label><br />
             <label class="secondary">으낙봇과 함께하세요.</label> 
             <div class="deep"></div>
-            
+        </div>
+        <div class="right">
+            <div class="deep"></div>
             <div class="profile">
                 <table>
                     <tbody>
@@ -62,8 +65,12 @@
             </div>
 
             <hr />
-            <button class="start">시작하기</button>
+            <a href="/login"><button class="start">시작하기</button></a>
         </div>
+    </div>
+    <div class="footer">
+        <label><a href="https://github.com/R3turn-Dev/" target="_blank">R3turn-Dev</a> / <a href="" target="_blank">Team Crescendo</a></label><br />
+        <label>Copyright ⓒ이은학 2018 All rights reserved.</label>
     </div>
 </body>
 </html>
