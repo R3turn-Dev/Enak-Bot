@@ -46,12 +46,13 @@ class Login:
         @self.parent.bp.route('/out')
         def logout(*args, **kwargs):
             platform = request.args.get("platform")
+            returning = request.args.get("redirect", "/")
 
             if session.get("li_platform") and session['li_platform'].get(platform):
                 session['li_platform'].pop(platform, None)
                 session.modified = True
 
-            return """<script>location.href="/";</script>"""
+            return f"""<script>location.href="{returning}";</script>"""
 
         @self.parent.bp.route("/<any(css, img, js, media):folder>/<path:filename>")
         def statics(folder, filename):
