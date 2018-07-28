@@ -7,5 +7,10 @@ function discord() {
 }
 
 function success() {
-    location.href = "/";
+    let rurl = new URL(location.href).searchParams.get("redirect");
+    if(rurl) {
+        location.href = rurl;
+    } else {
+        location.href = "/";
+    }
 }
