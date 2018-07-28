@@ -9,7 +9,10 @@ engine = FlaskEngine(
     webpages=[
         "pages.root",
         "pages.login",
-        "pages.sso"
+        "pages.sso",
+        "pages.service",
+        "pages.profile",
+        "pages.rank"
     ]
 )
 
