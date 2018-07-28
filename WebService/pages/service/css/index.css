@@ -1,0 +1,100 @@
+/*
+    Author: return0927, 이은학
+    Path: Service
+*/
+
+html, body {
+    margin: 0;
+}
+
+div {
+    display: block;
+}
+
+.screen  {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.footer {
+    position: fixed;
+
+    width: 100%;
+
+    font-size: 13px;
+    text-align: center;
+
+    bottom: 5px;
+}
+
+a {
+    text-decoration: none;
+}
+
+.float-left {
+    float: left;
+}
+
+nav.nav {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+
+    font-size: 15px;
+}
+
+nav.nav a {
+    display: block;
+    text-align: center;
+
+    cursor: pointer;
+
+    height: 30px;
+    width: 150px;
+
+    border: 1px gray solid;
+    color: #007bff;
+    font-weight: lighter;
+    padding-top: 10px;
+}
+
+nav.nav label.head {
+    display: block;
+    padding-top: 5px;
+    padding-left: 5px;
+
+    text-align: initial;
+
+    background-color: #eaeaea;
+
+    border: 1px gray solid;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+
+    height: 25px;
+    width: 145px;
+}
+
+nav.nav a:last-child {
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+nav.nav a.selected {
+    color: black;
+    font-weight: bold;
+
+    cursor: inital;
+}
+
+nav.nav a.selected::before {
+    position: absolute;
+    left: 1px;
+
+    margin-top: -10px;
+
+    content: '';
+    height: 40px;
+    width: 2px;
+    background-color: purple;
+}
