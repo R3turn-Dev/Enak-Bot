@@ -1,0 +1,184 @@
+/*
+    Author: return0927, 이은학
+    Path: Service
+*/
+
+@import url(https://cdn.rawgit.com/moonspam/NanumSquare/master/nanumsquare.css);
+
+html, body {
+    margin: 0;
+
+    font-family: 'NanumSquare', sans-serif;
+}
+
+html {
+    padding-bottom: 50px;
+}
+
+div {
+    display: block;
+}
+
+.screen  {
+    margin: 50px 0 100px 0;
+    margin-left: auto;
+    margin-right: auto;
+
+    width: 1000px;
+}
+
+.footer {
+    position: fixed;
+
+    width: 100%;
+
+    font-size: 13px;
+    background-color: white;
+    color: black;
+    text-align: center;
+
+    bottom: 0;
+    padding-bottom: 5px;
+}
+
+a {
+    text-decoration: none;
+}
+
+nav.nav {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+
+    font-size: 15px;
+}
+
+nav.nav a {
+    display: block;
+    text-align: center;
+
+    cursor: pointer;
+
+    height: 30px;
+    width: 150px;
+
+    border: 1px gray solid;
+    color: #007bff;
+    font-weight: lighter;
+    padding-top: 10px;
+}
+
+nav.nav label.head {
+    display: block;
+    padding-top: 5px;
+    padding-left: 5px;
+
+    text-align: initial;
+
+    background-color: #eaeaea;
+
+    border: 1px gray solid;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+
+    height: 25px;
+    width: 145px;
+}
+
+nav.nav a:last-child {
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+nav.nav a.selected {
+    color: black;
+    font-weight: bold;
+
+    cursor: inital;
+}
+
+nav.nav a.selected::before {
+    position: absolute;
+    left: 1px;
+
+    margin-top: -10px;
+
+    content: '';
+    height: 40px;
+    width: 2px;
+    background-color: purple;
+}
+
+nav > * {
+    margin-bottom: -1px;
+}
+
+.heading {
+    font-size: 1.5em;
+}
+
+.heading .channel, .heading .user {
+    font-size: 2rem;
+    font-weight: bolder;
+}
+
+/* Channel ranking */
+thead th {
+    width: 100px;
+}
+
+thead th:nth-child(2) {
+    width: 200px;
+}
+
+tr td {
+    text-align: center;
+}
+
+tr td:last-child {
+    text-align: right;
+}
+/* ================= */
+
+/* My View */
+.my-view thead th {
+    width: 100px;
+}
+
+.my-view thead th:first-child {
+    width: 200px;
+}
+
+.my-view tr td {
+    text-align: center;
+}
+
+.my-view tr td:nth-child(2) {
+    text-align: right;
+}
+/* ================= */
+
+.percent::before, .percent::after {
+    content: ' ';
+}
+
+.percent {
+    font-weight: bold;
+}
+
+.info {
+    margin: 10px 0 25px 10px;
+}
+
+.float-left {
+    padding-left: 10px;
+
+    float: left !important;
+}
+
+.me {
+    font-weight: bolder;
+
+    background-color: greenyellow;
+}
+

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>으낙봇 : EnakBot</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="css/index.css{{ debugstring }}" />
+
+    {{ google_analystics|safe }}
+
+</head>
+<body>
+    <div class="screen">
+        <div class="heading">
+            <label class="user">{{ user }}</label>
+            <label>님의 포인트</label>
+        </div>
+        <div class="info">
+            
+        </div>
+        <div class="row">
+            <div class="float-left">
+                <nav class="nav">
+                        <label class="head">포인트 랭킹</label>
+                        <a href="./{{ channel }}">전체 랭킹</a>
+                        <a class="selected" href="./{{ channel }}?view=my">내 랭킹</a>
+                    </nav>
+            </div>
+            <div class="float-left">
+                <table class="my-view">
+                    <thead>
+                        <th>채널</th>
+                        <th>포인트</th>
+                        <th>랭킹</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><hr /></td>
+                            <td><hr /></td>
+                            <td><hr /></td>
+                        </tr>{% for c, p, r in data %}
+                        <tr>
+                            <td>{{ c }}</td>
+                            <td>{{ "{:,}".format(p) }}</td>
+                            <td>{{ r }}</td>
+                        </tr>{% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <label><a href="https://github.com/R3turn-Dev/" target="_blank">R3turn-Dev</a> / <a href="" target="_blank">Team Crescendo</a></label><br />
+        <label>Copyright ⓒ이은학 2018 All rights reserved.</label>
+    </div>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>으낙봇 : EnakBot</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="js/index.js{{ debugstring }}"></script>
+    <link rel="stylesheet" href="css/index.css{{ debugstring }}" />
+
+    {{ google_analystics|safe }}
+
+</head>
+<body>
+    <div class="screen">
+        <div class="heading">
+            <label class="channel">{{ channel }}</label>
+            <label>님의 채널</label>
+        </div>
+        <div class="info">
+                <label>상위 5명이 전체 포인트의</label><label class="percent">{{ "{:.3f}".format(perc_5) }}%</label><label>를 차지하고 있습니다.</label><br />
+                <label>상위 10명이 전체 포인트의</label><label class="percent">{{ "{:.3f}".format(perc_10) }}%</label><label>를 차지하고 있습니다.</label>
+        </div>
+        <div class="row">
+            <div class="float-left">
+                <nav class="nav">
+                        <label class="head">포인트 랭킹</label>
+                        <a class="{{ 'selected' if sel=='' }}" href="./{{ channel }}">전체 랭킹</a>
+                        <a class="{{ 'selected' if sel=='my' }}" href="./{{ channel }}?view=my">내 랭킹</a>
+                    </nav>
+            </div>
+            <div class="float-left">
+                <table>
+                    <thead>
+                        <th>#Rank</th>
+                        <th>트위치 아이디</th>
+                        <th>포인트</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><hr /></td>
+                            <td><hr /></td>
+                            <td><hr /></td>
+                        </tr>{% for u, p, r, me in data %}
+                        <tr {% if me %}class="me"{% endif %}>
+                            <td>{{ r }}</td>
+                            <td>{{ u }}</td>
+                            <td>{{ "{:,}".format(p) }}</td>
+                        </tr>{% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <label><a href="https://github.com/R3turn-Dev/" target="_blank">R3turn-Dev</a> / <a href="" target="_blank">Team Crescendo</a></label><br />
+        <label>Copyright ⓒ이은학 2018 All rights reserved.</label>
+    </div>
+</body>
+</html>
