@@ -4,6 +4,7 @@ import socket
 import aiohttp
 import asyncio
 import inspect
+import requests
 import importlib
 from datetime import datetime, timedelta
 
@@ -33,6 +34,16 @@ class APIConnector:
                 _tid = _temp['_id']
 
                 return User(uid=name, nick=_nick, tid=_tid)
+
+    def _get_user_by_name(self, name):
+        with requests.get(f"https://api.twitch.tv/kraken/users?login={name}", headers=self._make_header()) as resp:
+            data = resp.json()
+
+            _temp = data['users'][0]
+            _nick = _temp['display_name']
+            _tid = _temp['_id']
+
+            return User(uid=name, nick=_nick, tid=_tid)
 
     async def get_user_by_id(self, uid):
         async with aiohttp.ClientSession() as sess:
@@ -104,6 +115,24 @@ class APIConnector:
                 if _data and "created_at" in _data:
                     return datetime.strptime(_data['created_at'], "%Y-%m-%dT%H:%M:%SZ")
 
+    def _get_is_channel_followed(self, channel: User, user: User):
+        with requests.get(f"https://api.twitch.tv/kraken/users/{user.tid}/follows/channels/{channel.tid}", headers=self._make_header()) as resp:
+            _data = resp.json()
+
+            if _data and "created_at" in _data:
+                return datetime.strptime(_data['created_at'], "%Y-%m-%dT%H:%M:%SZ")
+
+        return None
+
+    def get_members_on_chat(self, channel):
+        if isinstance(channel, str):
+            channel = self._get_user_by_name(channel)
+
+        with requests.get(f"https://tmi.twitch.tv/group/user/{channel.name}/chatters") as resp:
+            _data = resp.json()
+
+            return _data['chatters']
+
         return None
 
     def humanizeTimeDiff(self, timestamp = timedelta(seconds=0)):
@@ -156,7 +185,7 @@ class TwichClient:
         Twitch User ID to act as
     token : str
         Twitch OAuth2 Token to login with
-    channel : list
+    channels : list
         Twitch Channels to join
     command_prefix : str
         Command prefix for command identifying
@@ -203,6 +232,7 @@ class TwichClient:
         self.cogs = {}
         self.extensions = {}
         self.commands = {}
+        self.workers = []
 
         self.socket = None
         self.loop = asyncio.get_event_loop()
@@ -333,6 +363,10 @@ class TwichClient:
             
             if name.startswith('on_'):
                 self.add_listener(member)
+
+    def add_worker(self, worker):
+        print(" Adding a worker")
+        self.workers.append(worker)
 
     def load_extension(self, name):
         if name in self.extensions:
@@ -473,6 +507,8 @@ class TwichClient:
                         await self._callback(self.callbacks['on_chat'], temp)
                     await self.process_command(temp)
 
+                    await asyncio.sleep(0.01)
+
             except Exception as e:
                 await self._callback(self.callbacks['on_error'], RawParseError(f" Error on internal {repr(e)}",
                                                                                data=data))
@@ -481,6 +517,11 @@ class TwichClient:
 
     def run(self, *args, **kwargs):
         self.keep_running = True
+
+        print(self.workers)
+        for worker in self.workers:
+            self.loop.create_task(worker._worker())
+
         self.loop.run_until_complete(self._run())
 
     def close(self):
