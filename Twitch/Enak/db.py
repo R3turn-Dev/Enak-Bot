@@ -1,7 +1,5 @@
 from psycopg2 import connect
 from threading import get_ident
-from json import dumps
-from re import escape
 
 
 class PostgreSQL:
@@ -46,4 +44,7 @@ class PostgreSQL:
         return self.curDict[thread_id]
 
     def execute(self, query):
-        return self.get_connection().execute(query)
+        cur = self.get_cursor()
+        cur.execute(query)
+        return cur
+
