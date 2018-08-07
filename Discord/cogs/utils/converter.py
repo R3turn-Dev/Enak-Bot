@@ -25,7 +25,7 @@ def setup(bot):
 _COMMAND_FORMAT = """
     @commands.command('{command.present}', pass_context=True)
     async def {command.global}(self, ctx, *args, **kwargs):
-        stack = {
+        stack = [
             "ㅎㅇㅎㅇ",
             "으낙입니다",
             "그러는 당신은?"
